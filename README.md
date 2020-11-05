@@ -1,1 +1,1 @@
-# k8s-custom-linter
+# Kubernetes Custom Manifest Linter
