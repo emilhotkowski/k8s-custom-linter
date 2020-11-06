@@ -1,11 +1,13 @@
 import { YamlFile } from "../parser/yamlFile";
 import { ImageNameRule } from "./customRules/imageNameRule";
+import { NamespaceRule } from "./customRules/namespaceRule";
 import { Result } from "./result";
 import { Rule } from "./rule";
 
 export class RuleResolver {
     #rules: Rule[] = [
-        new ImageNameRule(process.env.REPOSITORY_NAME!)
+        new ImageNameRule(process.env.REPOSITORY_NAME!),
+        new NamespaceRule(process.env.NAMESPACE!)
     ]
 
     resolveRules(yamlFiles: YamlFile[]): Result[] {

@@ -8,7 +8,8 @@ const folderPath = process.argv[2]
 
 
 // for a moment
-process.env.REPOSITORY_NAME = "wrong"
+process.env.REPOSITORY_NAME = "emilhotkowskirepo"
+process.env.NAMESPACE = "development"
 
 class App {
     yamlParser = new YamlParser()
