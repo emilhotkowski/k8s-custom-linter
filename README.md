@@ -5,6 +5,7 @@ Application allows to write custom rules for kubernetes manifest linting.
 ## Requirements 
 
 node.js v14.15.0
+
 npm     6.14.8
 
 ## Instalation
