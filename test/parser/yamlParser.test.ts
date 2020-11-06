@@ -1,3 +1,4 @@
+import { fail } from "assert";
 import { YamlParser } from "../../src/parser/yamlParser";
 
 describe('Single yaml file parsing', () => {
@@ -6,39 +7,42 @@ describe('Single yaml file parsing', () => {
     test('Proper yaml parsing', async () => {
         const result = await yamlParser.parseYamlFile('test/resources/proper_yaml.yaml')
 
-        expect(result).toStrictEqual({
-            apiVersion: "v1",
-            kind: "Pod",
-            metadata: {
-                name: "static-web",
-                labels: {
-                    role: "myrole"
-                }
-            },
-            spec: {
-                containers: [{
-                    name: "web",
-                    image: "testrepo/nginx",
-                    ports: [{
+        expect(result).not.toBeNull()
+        if (result) {
+            expect(result.yamlObject).toStrictEqual({
+                apiVersion: "v1",
+                kind: "Pod",
+                metadata: {
+                    name: "static-web",
+                    labels: {
+                        role: "myrole"
+                    }
+                },
+                spec: {
+                    containers: [{
                         name: "web",
-                        containerPort: 80,
-                        protocol: "TCP"
+                        image: "testrepo/nginx",
+                        ports: [{
+                            name: "web",
+                            containerPort: 80,
+                            protocol: "TCP"
+                        }]
                     }]
-                }]
-            }
-        })
+                }
+            })
+        }
     });
 
     test('Bad yaml file parsing', async () => {
-        const result = await yamlParser.parseYamlFile('test/resources/bad_yaml.yaml')
-
-        expect(result).toBeUndefined()
+        yamlParser.parseYamlFile('test/resources/bad_yaml.yaml')
+            .then(file => fail())
+            .catch(e => expect(e).not.toBeNull())
     });
 
     test('Not existing yaml file parsing', async () => {
-        const result = await yamlParser.parseYamlFile('test/resources/nonexisting.yaml')
-
-        expect(result).toBeUndefined()
+        yamlParser.parseYamlFile('test/resources/nonexisting.yaml')
+            .then(file => fail())
+            .catch(e => expect(e).not.toBeNull())
     });
 })
 
@@ -49,10 +53,14 @@ describe('Whole folder yaml file parsing', () => {
         const result = await yamlParser.parseYamlFiles('test/resources')
 
         const resultsOfPromises = []
-        for(const filePromise of result) {
-            const file = await filePromise;
-            if(file) {
-                resultsOfPromises.push(file);
+        for (const filePromise of result) {
+            try {
+                const file = await filePromise;
+                if (file) {
+                    resultsOfPromises.push(file);
+                }
+            } catch (e) {
+                // ignore errors
             }
         }
 
