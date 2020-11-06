@@ -17,7 +17,7 @@ Copy repository and run following command :
 
 To verify your kubernetes manifest run following command :
 
-`npm start <folder_with_manifests`
+`npm start <folder_with_manifests>`
 
 Look at following example 
 
