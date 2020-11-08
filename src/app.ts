@@ -2,6 +2,7 @@ import chalk from "chalk"
 import { mainModule } from "process"
 import { YamlParser } from "./parser/yamlParser"
 import { Reporter } from "./report/reporter"
+import { ValidationReport } from "./report/validationReport"
 import { RuleResolver } from "./rules/ruleResolver"
 
 const folderPath = process.argv[2]
@@ -22,14 +23,14 @@ class App {
             .then(files => this.ruleResolver.resolveRules(files))
         const reports = this.reporter.createReports(results)
 
-        for(const report of reports) {
-            if(report) {
-                console.log("")
-                console.log(report.fileInfo)
-                console.log(report.validationInfo)
-                report.validationResultsInfo.forEach(info => console.log("\t" + info))
-            }
-        }
+        reports.forEach(reportPromise => reportPromise.then(report => this.printReport(report)))
+    }
+
+    private printReport(report: ValidationReport) {
+        console.log("")
+        console.log(report.fileInfo)
+        console.log(report.validationInfo)
+        report.validationResultsInfo.forEach(info => console.log("\t" + info))
     }
 }
 

@@ -34,15 +34,13 @@ describe('Single yaml file parsing', () => {
     });
 
     test('Bad yaml file parsing', async () => {
-        yamlParser.parseYamlFile('test/resources/bad_yaml.yaml')
-            .then(file => fail())
-            .catch(e => expect(e).not.toBeNull())
+        const result = await yamlParser.parseYamlFile('test/resources/bad_yaml.yaml')
+        expect(result.ioError).not.toBeUndefined()
     });
 
     test('Not existing yaml file parsing', async () => {
-        yamlParser.parseYamlFile('test/resources/nonexisting.yaml')
-            .then(file => fail())
-            .catch(e => expect(e).not.toBeNull())
+        const result = await yamlParser.parseYamlFile('test/resources/nonexisting.yaml')
+        expect(result.ioError).not.toBeUndefined()
     });
 })
 
@@ -52,18 +50,8 @@ describe('Whole folder yaml file parsing', () => {
     test('Whole folder yaml parsing', async () => {
         const result = await yamlParser.parseYamlFiles('test/resources')
 
-        const resultsOfPromises = []
-        for (const filePromise of result) {
-            try {
-                const file = await filePromise;
-                if (file) {
-                    resultsOfPromises.push(file);
-                }
-            } catch (e) {
-                // ignore errors
-            }
-        }
+        const correctResults = (await Promise.all(result)).filter(val => val.ioError)
 
-        expect(resultsOfPromises.length).toBeGreaterThan(0)
+        expect(correctResults.length).toBeGreaterThan(0)
     });
 })

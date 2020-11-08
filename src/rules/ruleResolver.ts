@@ -10,35 +10,32 @@ export class RuleResolver {
         new NamespaceRule(process.env.NAMESPACE!)
     ]
 
-    resolveRules(yamlFiles: YamlFile[]): Result[] {
-        const results: Result[] = []
-        for (const yamlFile of yamlFiles) {
-            results.push(
-                this.applyRule(yamlFile)
-            )
-        }
-
-        return results
+    resolveRules(yamlFiles: Promise<YamlFile>[]): Promise<Result>[] {
+        return yamlFiles.map(filePromise => filePromise.then(yamlFile => this.applyRule(yamlFile)))
     }
 
     private applyRule(yamlFile: YamlFile): Result {
-        let validRules = 0;
-        const invalidRules: Rule[] = []
-        for (const rule of this.#rules) {
-            const validationResult = rule.validate(yamlFile.yamlObject)
-            if (validationResult) {
-                validRules++
-            } else {
-                invalidRules.push(rule)
-            }
+        if (yamlFile.ioError) {
+            return this.getErrorResult(yamlFile)
         }
+
+        const invalidRules = this.#rules.filter(rule => !rule.validate(yamlFile.yamlObject))
 
         return {
             numberOfRules: this.#rules.length,
-            validRules,
+            validRules: this.#rules.length - invalidRules.length,
             invalidRules,
-            fileName: yamlFile.fileName
+            filePath: yamlFile.filePath
         }
     }
 
+    private getErrorResult(yamlFile: YamlFile) : Result {
+        return {
+            errorMessage: yamlFile.ioError!.message,
+            numberOfRules: this.#rules.length,
+            validRules: 0,
+            invalidRules: [],
+            filePath: yamlFile.filePath
+        }
+    }
 }
